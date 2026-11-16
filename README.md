@@ -7,7 +7,7 @@ PIC: Fossy
 | Role | Nama | NPM |
 | --- | --- | --- |
 | Backend | Forza Derian | 2506596041 |
-| Frontend | Mirza Attar Fauzie | (NPM) |
+| Frontend | Mirza Attar Fauzie | 2606748616 |
 | Frontend | Lusiana Cendra Sari | (NPM) |
 
 ## Deskripsi

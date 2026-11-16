@@ -1,0 +1,32 @@
+[
+  {
+    "id": "user-001",
+    "name": "Andi Pratama",
+    "email": "andi@example.com",
+    "preferredContact": "EMAIL"
+  },
+  {
+    "id": "user-002",
+    "name": "Siti Aisyah",
+    "email": "siti@example.com",
+    "preferredContact": "WHATSAPP"
+  },
+  {
+    "id": "user-003",
+    "name": "Budi Santoso",
+    "email": "budi@example.com",
+    "preferredContact": "EMAIL"
+  },
+  {
+    "id": "user-004",
+    "name": "Neora Putri",
+    "email": "neora@example.com",
+    "preferredContact": "WHATSAPP"
+  },
+  {
+    "id": "user-005",
+    "name": "Rizky Ramadhan",
+    "email": "rizky@example.com",
+    "preferredContact": "EMAIL"
+  }
+]

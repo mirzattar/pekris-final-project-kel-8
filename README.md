@@ -35,7 +35,7 @@ Task division:
 
 1. Mirza Attar Fauzie: Routing design, interactive feature implementation, frontend-backend contract implementation, spam-protection
 2. Forza Derian: Backend implementation
-3. Lusiana Cendra Sari:
+3. Lusiana Cendra Sari: Mock data preparation for frontend and backend development.
 
 ### Define search/filter query parameters and pagination behavior
 

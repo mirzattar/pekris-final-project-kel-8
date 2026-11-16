@@ -26,9 +26,9 @@ Routes:
 
 Features:
 
-1. Lightweight responsive interface
-2. Spam-protected contact information
-3. Comprehensive report fields (image upload, location of missing item, finder details, item description, protected contact info)
+1. Lightweight responsive interface.
+2. Spam-protected contact information.
+3. Comprehensive report fields (image upload, location of missing item, finder details, item description, protected contact info).
 
 Task division:
 
@@ -56,9 +56,9 @@ The report submission format provides several fields:
 1. Title of the reported item.
 2. Description of the reported item.
 3. Category of the reported item.
-4. Location where the reported item was found/last seen.
-5. Date that the item was lost/last seen, defaults to the day the report was made.
-6. The preferred contact method
+4. Location where the reported item was lost/found.
+5. Date that the item was lost/found, defaults to the day the report was made.
+6. The preferred contact method.
 7. An optional image upload of the reported item.
 
 The image upload field is entirely optional, and can be emptied if so desired. A placeholder image of the item category will be used instead.

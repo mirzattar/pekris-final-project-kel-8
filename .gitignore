@@ -167,3 +167,6 @@ vite.config.ts.timestamp-*
 
 # PM-agnostic repo
 bun.lock
+
+# dependencies
+node_modules/

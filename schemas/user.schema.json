@@ -1,0 +1,28 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "User",
+	"type": "object",
+	"properties": {	
+		"id": {
+			"title": "ID",
+			"type": "string",
+			"pattern": "report-.+"
+		},
+		"name": {
+			"type": "string"
+		},
+		"email": {
+			"type": "string",
+			"pattern": "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"
+		},
+		"preferredContact": {
+			"type": "string"
+		}
+	},
+	"required": [
+		"id",
+		"name",
+		"email",
+		"preferredContact"
+	]
+}

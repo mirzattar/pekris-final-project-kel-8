@@ -1,4 +1,4 @@
-import express from 'express'
+import express, { type NextFunction, type Request, type Response } from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import reportRoutes from './routes/reports'
@@ -19,6 +19,13 @@ app.get('/', (_req, res) => {
 
 app.use((_req, res) => {
   res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Route not found' } })
+})
+
+app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  if (err instanceof SyntaxError && (err as { type?: string }).type === 'entity.parse.failed') {
+    return res.status(400).json({ error: { code: 'INVALID_JSON', message: 'Request body is not valid JSON' } })
+  }
+  res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } })
 })
 
 app.listen(PORT, () => {

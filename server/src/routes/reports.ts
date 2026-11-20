@@ -7,8 +7,32 @@ const router = Router()
 router.get('/', (req, res) => {
   const page = Math.max(parseInt(req.query.page as string) || 1, 1)
   const limit = Math.min(Math.max(parseInt(req.query.limit as string) || 10, 1), 100)
+  const { search, q, type, category, location, status, incidentDate } = req.query
 
-  const sorted = [...reports].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  let filtered = reports
+  const term = ((search || q) as string | undefined)?.toLowerCase()
+  if (term) {
+    filtered = filtered.filter(r =>
+      r.title.toLowerCase().includes(term) || r.description.toLowerCase().includes(term)
+    )
+  }
+  if (type === 'LOST' || type === 'FOUND') {
+    filtered = filtered.filter(r => r.type === type)
+  }
+  if (category) {
+    filtered = filtered.filter(r => r.category === category)
+  }
+  if (location) {
+    filtered = filtered.filter(r => r.location.toLowerCase().includes((location as string).toLowerCase()))
+  }
+  if (status === 'ACTIVE' || status === 'RESOLVED') {
+    filtered = filtered.filter(r => r.status === status)
+  }
+  if (incidentDate) {
+    filtered = filtered.filter(r => r.incidentDate === incidentDate)
+  }
+
+  const sorted = [...filtered].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   const total = sorted.length
   const totalPages = total === 0 ? 0 : Math.ceil(total / limit)
   const start = (page - 1) * limit

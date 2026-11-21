@@ -6,7 +6,7 @@
 		"id": {
 			"title": "ID",
 			"type": "string",
-			"pattern": "report-.+"
+			"pattern": "user-.+"
 		},
 		"name": {
 			"type": "string"

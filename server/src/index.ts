@@ -22,8 +22,16 @@ app.use((_req, res) => {
 })
 
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
-  if (err instanceof SyntaxError && (err as { type?: string }).type === 'entity.parse.failed') {
+  const error = err as { type?: string; status?: number; statusCode?: number }
+  if (error.type === 'entity.parse.failed') {
     return res.status(400).json({ error: { code: 'INVALID_JSON', message: 'Request body is not valid JSON' } })
+  }
+  if (error.type === 'entity.too.large') {
+    return res.status(413).json({ error: { code: 'PAYLOAD_TOO_LARGE', message: 'Request body is too large' } })
+  }
+  const status = error.status ?? error.statusCode
+  if (status === 400 || status === 413 || status === 415) {
+    return res.status(status).json({ error: { code: 'INVALID_REQUEST', message: 'Request could not be processed' } })
   }
   res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } })
 })

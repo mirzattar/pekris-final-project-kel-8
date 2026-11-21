@@ -3,14 +3,30 @@ import reports from '../../../mock/reports.json'
 import users from '../../../mock/users.json'
 
 const router = Router()
+const categories = ['BOTTLE', 'STATIONERY', 'ACCESSORIES', 'ELECTRONICS', 'DOCUMENTS', 'CLOTHING', 'OTHERS']
+const isString = (value: unknown): value is string => typeof value === 'string'
+const isDate = (value: unknown): value is string =>
+  isString(value) && /^\d{4}-\d{2}-\d{2}$/.test(value) &&
+  !Number.isNaN(Date.parse(`${value}T00:00:00Z`)) && new Date(`${value}T00:00:00Z`).toISOString().startsWith(value)
 
 router.get('/', (req, res) => {
   const page = Math.max(parseInt(req.query.page as string) || 1, 1)
   const limit = Math.min(Math.max(parseInt(req.query.limit as string) || 10, 1), 100)
   const { search, q, type, category, location, status, incidentDate } = req.query
+  const termValue = search ?? q
+
+  if (Array.isArray(termValue) || Array.isArray(location)) {
+    return res.status(400).json({ error: { code: 'INVALID_QUERY', message: 'search and location must be single values' } })
+  }
+  if (termValue !== undefined && !isString(termValue)) {
+    return res.status(400).json({ error: { code: 'INVALID_QUERY', message: 'search must be a string' } })
+  }
+  if (location !== undefined && !isString(location)) {
+    return res.status(400).json({ error: { code: 'INVALID_QUERY', message: 'location must be a string' } })
+  }
 
   let filtered = reports
-  const term = ((search || q) as string | undefined)?.toLowerCase()
+  const term = termValue?.toLowerCase()
   if (term) {
     filtered = filtered.filter(r =>
       r.title.toLowerCase().includes(term) || r.description.toLowerCase().includes(term)
@@ -19,16 +35,16 @@ router.get('/', (req, res) => {
   if (type === 'LOST' || type === 'FOUND') {
     filtered = filtered.filter(r => r.type === type)
   }
-  if (category) {
+  if (isString(category)) {
     filtered = filtered.filter(r => r.category === category)
   }
-  if (location) {
-    filtered = filtered.filter(r => r.location.toLowerCase().includes((location as string).toLowerCase()))
+  if (isString(location)) {
+    filtered = filtered.filter(r => r.location.toLowerCase().includes(location.toLowerCase()))
   }
   if (status === 'ACTIVE' || status === 'RESOLVED') {
     filtered = filtered.filter(r => r.status === status)
   }
-  if (incidentDate) {
+  if (isDate(incidentDate)) {
     filtered = filtered.filter(r => r.incidentDate === incidentDate)
   }
 
@@ -52,17 +68,23 @@ router.get('/:id', (req, res) => {
 })
 
 router.post('/', (req, res) => {
+  if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) {
+    return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Request body must be a JSON object' } })
+  }
   const { title, description, type, category, location, incidentDate, reporterId, contactMethod } = req.body
 
   const errors: { field: string; message: string }[] = []
-  if (!title) errors.push({ field: 'title', message: 'title is required' })
-  if (!description) errors.push({ field: 'description', message: 'description is required' })
-  if (!['LOST', 'FOUND'].includes(type)) errors.push({ field: 'type', message: 'type must be LOST or FOUND' })
-  if (!category) errors.push({ field: 'category', message: 'category is required' })
-  if (!location) errors.push({ field: 'location', message: 'location is required' })
-  if (!incidentDate) errors.push({ field: 'incidentDate', message: 'incidentDate is required' })
-  if (!reporterId) errors.push({ field: 'reporterId', message: 'reporterId is required' })
-  if (!['EMAIL', 'WHATSAPP'].includes(contactMethod)) errors.push({ field: 'contactMethod', message: 'contactMethod must be EMAIL or WHATSAPP' })
+  const requiredText = (field: string, value: unknown) => {
+    if (!isString(value) || !value.trim()) errors.push({ field, message: `${field} must be a non-empty string` })
+  }
+  requiredText('title', title)
+  requiredText('description', description)
+  requiredText('location', location)
+  requiredText('reporterId', reporterId)
+  if (type !== 'LOST' && type !== 'FOUND') errors.push({ field: 'type', message: 'type must be LOST or FOUND' })
+  if (!isString(category) || !categories.includes(category)) errors.push({ field: 'category', message: 'category is invalid' })
+  if (!isDate(incidentDate)) errors.push({ field: 'incidentDate', message: 'incidentDate must be a valid YYYY-MM-DD date' })
+  if (contactMethod !== 'EMAIL' && contactMethod !== 'WHATSAPP') errors.push({ field: 'contactMethod', message: 'contactMethod must be EMAIL or WHATSAPP' })
 
   if (errors.length > 0) {
     return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid report data', details: errors } })

@@ -1,0 +1,38 @@
+:root {
+	--accent: #5038bc;
+	--accent-2: #c424a3;
+	--accent-3: #ff427d;
+	--accent-4: #ff805b;
+	--accent-5: #ffbe4f;
+	--accent-6: #f9f871;
+
+	--bg-primary: white;
+	--bg-secondary: #F8F8F8;
+
+	--fg-primary: rgb(51 51 51);
+	--fg-secondary: rgb(156 163 175);
+	--fg-complement: oklch(from var(--fg-primary) calc(2 - l) c h);
+
+	--border-rad: 1rem;
+	--border-rad-2: .5rem;
+	--border-rad-pill: 100vw;
+
+	--fg-w-normal: 500;
+	--fg-w-bold: 600;
+
+	--shadow: rgba(0 0 0 / 0.2);
+
+	--dimming-factor: 0.2;
+
+	&:global(.theme-dark) {
+		--accent: oklch(from #5038bc calc(l + var(--dimming-factor)) c h);
+
+		--bg-primary: black;
+		--bg-secondary: oklch(from #F8F8F8 calc(l - 0.75) c h);
+
+		--fg-primary: whitesmoke;
+		--fg-secondary: rgb(156 163 175);
+
+		--shadow: rgba(255 255 255 / 0.2)
+	}
+}

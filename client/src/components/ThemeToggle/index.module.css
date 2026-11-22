@@ -1,0 +1,29 @@
+.theme_toggle_root {
+	border: 0;
+	appearance: none;
+	background-color: var(--accent);
+	padding: 0;
+	display: block;
+	cursor: pointer;
+	width: 3rem;
+	border-radius: var(--border-rad-pill);
+}
+
+.theme_toggle_thumb {
+	background-color: var(--bg-secondary);
+	display: block;
+	aspect-ratio: 1;
+	height: auto;
+	width: 1.5rem;
+	border-radius: var(--border-rad-pill);
+	padding: .25rem;
+	transition: transform 150ms ease-out;
+
+	&[data-state="checked"] {
+		transform: translateX(1.5rem);
+	}
+}
+
+:global(.theme-dark) .theme_toggle_thumb {
+	color: white;
+}

@@ -1,12 +1,22 @@
-import type { AppUser } from "../../types/global"
-import './App.css'
+import React, { StrictMode, useState } from "react"
+import PrimaryLayout from "./layouts/PrimaryLayout"
+import ThemeContext, { type Themes } from "./contexts/ThemeContext"
+import type { Routes } from "./main"
 
-function App() {
-	return (
-		<h1>Hello world!</h1>
-	)
+interface Props extends React.PropsWithChildren {
+	currentRoute: Routes
 }
 
-type abc = AppUser
+export default function App({ children, currentRoute }: Props) {
+	const [ theme, setTheme ] = useState<Themes>('light')
 
-export default App
+	return (
+		<StrictMode>
+			<ThemeContext value={ { theme, setTheme } }>
+				<PrimaryLayout currentRoute={ currentRoute }>
+					{ children }
+				</PrimaryLayout>
+			</ThemeContext>
+		</StrictMode>
+	)
+}

@@ -22,3 +22,32 @@ textarea,
 select {
 	font: inherit;
 }
+
+#root {
+	min-height: 100vh;
+	display: flex;
+}
+
+#app {
+	flex: auto;
+	font-family: "Poppins", sans-serif;
+	color: var(--fg-primary);
+}
+
+.icon-thick path {
+	stroke: currentColor;
+	stroke-width: 0.75px;
+	stroke-linejoin: round;
+	stroke-linecap: round;
+}
+
+.icon-color-accent {
+	color: var(--accent)
+}
+
+#app,
+#app * {
+	transition-property: background-color, color;
+	transition-duration: 500ms;
+	transition-timing-function: ease-in-out;
+}

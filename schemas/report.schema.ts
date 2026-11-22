@@ -1,4 +1,4 @@
-{
+export default {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "Report",
 	"type": "object",
@@ -36,7 +36,10 @@
 			"type": "string"
 		},
 		"imageUrl": {
-			"type": ["string", "null"]
+			"type": [
+				"string",
+				"null"
+			]
 		},
 		"reporterId": {
 			"type": "string",
@@ -75,4 +78,4 @@
 		"createdAt",
 		"status"
 	]
-}
+} as const

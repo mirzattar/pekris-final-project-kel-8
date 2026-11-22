@@ -1,0 +1,134 @@
+.nav_container {
+	display: flex;
+	position: fixed;
+	min-height: 4rem;
+	/* z-index: 2; */
+	min-width: 100vw;
+	box-shadow: 0 0 6px var(--shadow);
+	align-items: stretch;
+	padding-block: 1rem;
+	padding-inline: 2rem;
+	container-name: --nav;
+	container-type: inline-size;
+	background-color: var(--bg-primary);
+}
+
+.logo_container {
+	align-self: flex-start;
+	display: none;
+}
+
+.profile_icon {
+	appearance: none;
+	border: 0;
+	background-color: var(--bg-secondary);
+	border-radius: var(--border-rad-pill);
+	aspect-ratio: 1;
+	width: 2.5rem;
+	height: auto;
+	cursor: pointer;
+	color: var(--fg-primary);
+}
+
+.right_container {
+	margin-inline: auto 0;
+	display: flex;
+	gap: 1rem;
+}
+
+.toggle_sidebar {
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	flex-shrink: 1;
+	z-index: 2;
+}
+
+.menu_list {
+	display: flex;
+	align-items: center;
+	gap: 2rem;
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
+}
+
+.menu_item {
+	a {
+		color: var(--fg-secondary);
+		text-decoration-color: transparent;
+
+		&:focus-visible {
+			text-decoration-color: inherit;
+		}
+
+		&:hover {
+			color: var(--accent);
+		}
+	}
+}
+
+.menu_item.active_route a {
+	color: var(--accent);
+}
+
+.nav {
+	display: flex;
+}
+
+.sidebar {
+	display: none;
+	align-items: center;
+}
+
+.sidebar.expanded {
+	display: flex;
+	position: fixed;
+	background-color: var(--bg-primary);
+	height: 25vh;
+	min-width: 100vw;
+	box-shadow: 0 0 6px var(--shadow);
+	top: 0;
+	left: 0;
+}
+
+.sidebar_toggle_icon {
+	aspect-ratio: 1;
+	height: 30px;
+	width: auto;
+}
+
+.profile_dropdown_content {
+	background-color: var(--bg-primary);
+	padding: 1rem;
+	box-shadow: 0 0 3px var(--shadow);
+	border-radius: var(--border-rad);
+}
+
+.profile_dropdown_link {
+	font-family: "Poppins";
+	color: var(--fg-secondary);
+	text-decoration-color: transparent;
+
+	&:hover {
+		color: var(--accent);
+	}
+}
+
+@media (width > 768px) {
+	.nav_container {
+		padding-inline: 4rem;
+	}
+
+	.sidebar {
+		display: flex;
+	}
+
+	.toggle_sidebar {
+		display: none;
+	}
+
+	.logo_container {
+		display: initial;
+	}
+}

@@ -1,0 +1,10 @@
+@import "../../variables.css";
+
+.container {
+	background-color: var(--bg-primary);
+}
+
+.main {
+	margin-block-start: 5rem;
+	min-height: 100vh;
+}

@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ReportType {
+  LOST
+  FOUND
+}
+
+enum Category {
+  BOTTLE
+  STATIONERY
+  ACCESSORIES
+  ELECTRONICS
+  DOCUMENTS
+  CLOTHING
+  OTHERS
+}
+
+enum ContactMethod {
+  EMAIL
+  WHATSAPP
+}
+
+enum ReportStatus {
+  ACTIVE
+  RESOLVED
+}
+
+model User {
+  id               String         @id @default(cuid())
+  name             String
+  email            String         @unique
+  whatsapp         String?
+  preferredContact ContactMethod
+  reports          Report[]
+}
+
+model Report {
+  id            String         @id @default(cuid())
+  title         String
+  description   String
+  type          ReportType
+  category      Category       @default(OTHERS)
+  location      String
+  incidentDate  DateTime       @db.Date
+  imageUrl      String?
+  reporterId    String
+  contactMethod ContactMethod
+  status        ReportStatus   @default(ACTIVE)
+  createdAt     DateTime       @default(now())
+
+  reporter User @relation(fields: [reporterId], references: [id])
+
+  @@index([type])
+  @@index([category])
+  @@index([location])
+}

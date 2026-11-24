@@ -97,5 +97,5 @@ The server runs on `http://localhost:3000`. Environment variables are listed in 
 
 ### Notes
 
-Reports are stored in memory, so reports created through `POST /reports` are lost after a server restart. PostgreSQL persistence with Prisma is implemented in CP3.
+Reports are stored in memory, so reports created through `POST /reports` are lost after a server restart. Seed contacts in `mock/` are fictional and cannot be reached. PostgreSQL persistence with Prisma is implemented in CP3.
 

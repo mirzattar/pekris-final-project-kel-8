@@ -4,10 +4,20 @@ import users from '../../../mock/users.json'
 
 const router = Router()
 const categories = ['BOTTLE', 'STATIONERY', 'ACCESSORIES', 'ELECTRONICS', 'DOCUMENTS', 'CLOTHING', 'OTHERS']
+const reportFields = ['title', 'description', 'type', 'category', 'location', 'incidentDate', 'reporterId', 'contactMethod']
+const maxLengths = { title: 120, description: 2000, location: 120 } as const
 const isString = (value: unknown): value is string => typeof value === 'string'
 const isDate = (value: unknown): value is string =>
   isString(value) && /^\d{4}-\d{2}-\d{2}$/.test(value) &&
   !Number.isNaN(Date.parse(`${value}T00:00:00Z`)) && new Date(`${value}T00:00:00Z`).toISOString().startsWith(value)
+
+// Only the contact method chosen on the report is exposed, never both.
+const publicReporter = (reporterId: string, contactMethod: string) => {
+  const user = users.find(u => u.id === reporterId)
+  if (!user) return null
+  const value = contactMethod === 'WHATSAPP' ? user.whatsapp : user.email
+  return { name: user.name, contact: { method: contactMethod, value: value ?? null } }
+}
 
 router.get('/', (req, res) => {
   const errors: { field: string; message: string }[] = []
@@ -103,7 +113,7 @@ router.get('/:id', (req, res) => {
   if (!report) {
     return res.status(404).json({ error: { code: 'REPORT_NOT_FOUND', message: 'Report not found' } })
   }
-  res.json({ data: report })
+  res.json({ data: { ...report, reporter: publicReporter(report.reporterId, report.contactMethod) } })
 })
 
 router.post('/', (req, res) => {
@@ -113,16 +123,29 @@ router.post('/', (req, res) => {
   const { title, description, type, category, location, incidentDate, reporterId, contactMethod } = req.body
 
   const errors: { field: string; message: string }[] = []
-  const requiredText = (field: string, value: unknown) => {
-    if (!isString(value) || !value.trim()) errors.push({ field, message: `${field} must be a non-empty string` })
+  const unknownFields = Object.keys(req.body).filter(field => !reportFields.includes(field))
+  for (const field of unknownFields) {
+    errors.push({ field, message: `${field} is not an allowed field` })
+  }
+
+  const requiredText = (field: keyof typeof maxLengths, value: unknown) => {
+    if (!isString(value) || !value.trim()) {
+      errors.push({ field, message: `${field} must be a non-empty string` })
+    } else if (value.trim().length > maxLengths[field]) {
+      errors.push({ field, message: `${field} must be at most ${maxLengths[field]} characters` })
+    }
   }
   requiredText('title', title)
   requiredText('description', description)
   requiredText('location', location)
-  requiredText('reporterId', reporterId)
+  if (!isString(reporterId) || !reporterId.trim()) errors.push({ field: 'reporterId', message: 'reporterId must be a non-empty string' })
   if (type !== 'LOST' && type !== 'FOUND') errors.push({ field: 'type', message: 'type must be LOST or FOUND' })
   if (!isString(category) || !categories.includes(category)) errors.push({ field: 'category', message: 'category is invalid' })
-  if (!isDate(incidentDate)) errors.push({ field: 'incidentDate', message: 'incidentDate must be a valid YYYY-MM-DD date' })
+  if (!isDate(incidentDate)) {
+    errors.push({ field: 'incidentDate', message: 'incidentDate must be a valid YYYY-MM-DD date' })
+  } else if (incidentDate > new Date().toISOString().slice(0, 10)) {
+    errors.push({ field: 'incidentDate', message: 'incidentDate must not be in the future' })
+  }
   if (contactMethod !== 'EMAIL' && contactMethod !== 'WHATSAPP') errors.push({ field: 'contactMethod', message: 'contactMethod must be EMAIL or WHATSAPP' })
 
   if (errors.length > 0) {

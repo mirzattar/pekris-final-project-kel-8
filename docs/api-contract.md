@@ -126,8 +126,26 @@ GET /reports/report-001
 `200 OK`
 
 ```json
-{ "data": { "id": "report-001", "title": "Tumbler Hitam" } }
+{
+  "data": {
+    "id": "report-001",
+    "title": "Tumbler Hitam",
+    "contactMethod": "EMAIL",
+    "reporter": {
+      "name": "Andi Pratama",
+      "contact": { "method": "EMAIL", "value": "andi@example.com" }
+    }
+  }
+}
 ```
+
+The `reporter` object is returned by this endpoint only. `GET /reports` never includes it, so contacts cannot be harvested in bulk.
+
+`reporter.contact` contains exactly one method: the one the reporter selected for that report (`report.contactMethod`). The other method is never returned. A report with `contactMethod: "WHATSAPP"` returns the WhatsApp number and no email, and the reverse.
+
+`reporter` is `null` when `reporterId` matches no user.
+
+Seed data uses fictional contacts only: `@example.com` addresses and non-dialable WhatsApp placeholders, so no real person can be reached.
 
 `404 Not Found` when the id does not exist:
 
@@ -156,16 +174,16 @@ curl -X POST "https://pekris-final-project-kel-8-production.up.railway.app/repor
 
 ### Body
 
-All fields required. `status` is always set to `ACTIVE` and `imageUrl` to `null` by the server; sending them has no effect.
+All fields required. `status` is always set to `ACTIVE` and `imageUrl` to `null` by the server. Both are rejected if sent, along with every other field not listed below.
 
 | Field | Type | Rules |
 | --- | --- | --- |
-| `title` | string | Non-empty after trim. |
-| `description` | string | Non-empty after trim. |
+| `title` | string | Non-empty after trim, at most 120 characters. |
+| `description` | string | Non-empty after trim, at most 2000 characters. |
 | `type` | enum | `LOST` or `FOUND`. |
 | `category` | enum | One of the seven categories. |
-| `location` | string | Non-empty after trim. |
-| `incidentDate` | string | Valid `YYYY-MM-DD` calendar date. |
+| `location` | string | Non-empty after trim, at most 120 characters. |
+| `incidentDate` | string | Valid `YYYY-MM-DD` calendar date, not in the future. |
 | `reporterId` | string | Must exist in the seeded users. |
 | `contactMethod` | enum | `EMAIL` or `WHATSAPP`. |
 
@@ -186,6 +204,12 @@ All fields required. `status` is always set to `ACTIVE` and `imageUrl` to `null`
 ```
 
 A `reporterId` that passes the string check but matches no user returns the same `VALIDATION_ERROR` shape with `details: [{ "field": "reporterId", "message": "reporterId does not exist" }]`.
+
+## Report modification
+
+The API exposes no `PUT`, `PATCH`, or `DELETE` route for reports, so a public visitor cannot edit or delete an existing report. The only write operation is `POST /reports`, which always creates a new report.
+
+There is no authentication in this checkpoint. `reporterId` is supplied by the client and is validated only against the seeded users, so the API cannot prove that the submitter is that user. Adding authentication would be required before reports can be tied to a verified account.
 
 ## Error codes
 

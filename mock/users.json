@@ -3,30 +3,35 @@
     "id": "user-001",
     "name": "Andi Pratama",
     "email": "andi@example.com",
+    "whatsapp": "6200000000001",
     "preferredContact": "EMAIL"
   },
   {
     "id": "user-002",
     "name": "Siti Aisyah",
     "email": "siti@example.com",
+    "whatsapp": "6200000000002",
     "preferredContact": "WHATSAPP"
   },
   {
     "id": "user-003",
     "name": "Budi Santoso",
     "email": "budi@example.com",
+    "whatsapp": "6200000000003",
     "preferredContact": "EMAIL"
   },
   {
     "id": "user-004",
     "name": "Neora Putri",
     "email": "neora@example.com",
+    "whatsapp": "6200000000004",
     "preferredContact": "WHATSAPP"
   },
   {
     "id": "user-005",
     "name": "Rizky Ramadhan",
     "email": "rizky@example.com",
+    "whatsapp": "6200000000005",
     "preferredContact": "EMAIL"
   }
 ]

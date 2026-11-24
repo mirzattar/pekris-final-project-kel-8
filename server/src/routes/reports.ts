@@ -10,42 +10,81 @@ const isDate = (value: unknown): value is string =>
   !Number.isNaN(Date.parse(`${value}T00:00:00Z`)) && new Date(`${value}T00:00:00Z`).toISOString().startsWith(value)
 
 router.get('/', (req, res) => {
-  const page = Math.max(parseInt(req.query.page as string) || 1, 1)
-  const limit = Math.min(Math.max(parseInt(req.query.limit as string) || 10, 1), 100)
+  const errors: { field: string; message: string }[] = []
   const { search, q, type, category, location, status, incidentDate } = req.query
-  const termValue = search ?? q
 
-  if (Array.isArray(termValue) || Array.isArray(location)) {
-    return res.status(400).json({ error: { code: 'INVALID_QUERY', message: 'search and location must be single values' } })
+  const singleString = (field: string, value: unknown) => {
+    if (value === undefined || value === '') return undefined
+    if (Array.isArray(value) || !isString(value)) {
+      errors.push({ field, message: `${field} must be a single string value` })
+      return undefined
+    }
+    return value
   }
-  if (termValue !== undefined && !isString(termValue)) {
-    return res.status(400).json({ error: { code: 'INVALID_QUERY', message: 'search must be a string' } })
+
+  let page = 1
+  if (req.query.page !== undefined) {
+    const raw = req.query.page
+    if (!isString(raw) || !/^\d+$/.test(raw) || Number(raw) < 1) {
+      errors.push({ field: 'page', message: 'page must be an integer greater than or equal to 1' })
+    } else {
+      page = Number(raw)
+    }
   }
-  if (location !== undefined && !isString(location)) {
-    return res.status(400).json({ error: { code: 'INVALID_QUERY', message: 'location must be a string' } })
+
+  let limit = 10
+  if (req.query.limit !== undefined) {
+    const raw = req.query.limit
+    if (!isString(raw) || !/^\d+$/.test(raw) || Number(raw) < 1 || Number(raw) > 100) {
+      errors.push({ field: 'limit', message: 'limit must be an integer between 1 and 100' })
+    } else {
+      limit = Number(raw)
+    }
+  }
+
+  const term = singleString('search', search ?? q)?.toLowerCase()
+  const typeFilter = singleString('type', type)
+  if (typeFilter && typeFilter !== 'LOST' && typeFilter !== 'FOUND') {
+    errors.push({ field: 'type', message: 'type must be LOST or FOUND' })
+  }
+  const categoryFilter = singleString('category', category)
+  if (categoryFilter && !categories.includes(categoryFilter)) {
+    errors.push({ field: 'category', message: 'category is invalid' })
+  }
+  const locationFilter = singleString('location', location)
+  const statusFilter = singleString('status', status)
+  if (statusFilter && statusFilter !== 'ACTIVE' && statusFilter !== 'RESOLVED') {
+    errors.push({ field: 'status', message: 'status must be ACTIVE or RESOLVED' })
+  }
+  const dateFilter = singleString('incidentDate', incidentDate)
+  if (dateFilter && !isDate(dateFilter)) {
+    errors.push({ field: 'incidentDate', message: 'incidentDate must be a valid YYYY-MM-DD date' })
+  }
+
+  if (errors.length > 0) {
+    return res.status(400).json({ error: { code: 'INVALID_QUERY', message: 'Invalid query parameters', details: errors } })
   }
 
   let filtered = reports
-  const term = termValue?.toLowerCase()
   if (term) {
     filtered = filtered.filter(r =>
       r.title.toLowerCase().includes(term) || r.description.toLowerCase().includes(term)
     )
   }
-  if (type === 'LOST' || type === 'FOUND') {
-    filtered = filtered.filter(r => r.type === type)
+  if (typeFilter) {
+    filtered = filtered.filter(r => r.type === typeFilter)
   }
-  if (isString(category)) {
-    filtered = filtered.filter(r => r.category === category)
+  if (categoryFilter) {
+    filtered = filtered.filter(r => r.category === categoryFilter)
   }
-  if (isString(location)) {
-    filtered = filtered.filter(r => r.location.toLowerCase().includes(location.toLowerCase()))
+  if (locationFilter) {
+    filtered = filtered.filter(r => r.location.toLowerCase().includes(locationFilter.toLowerCase()))
   }
-  if (status === 'ACTIVE' || status === 'RESOLVED') {
-    filtered = filtered.filter(r => r.status === status)
+  if (statusFilter) {
+    filtered = filtered.filter(r => r.status === statusFilter)
   }
-  if (isDate(incidentDate)) {
-    filtered = filtered.filter(r => r.incidentDate === incidentDate)
+  if (dateFilter) {
+    filtered = filtered.filter(r => r.incidentDate === dateFilter)
   }
 
   const sorted = [...filtered].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())

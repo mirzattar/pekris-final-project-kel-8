@@ -7,8 +7,9 @@ dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 3000
+const corsOrigins = process.env.CORS_ORIGIN?.split(',').map(origin => origin.trim()).filter(Boolean)
 
-app.use(cors())
+app.use(cors({ origin: corsOrigins?.length ? corsOrigins : '*' }))
 app.use(express.json())
 
 app.use('/reports', reportRoutes)

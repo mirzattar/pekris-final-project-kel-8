@@ -3,11 +3,12 @@ import Styles from "./index.module.css"
 
 interface Props extends PropsWithChildren {
 	onClick?: MouseEventHandler<HTMLButtonElement>
-	type?: ButtonHTMLAttributes<HTMLButtonElement>["type"]
+	type?: ButtonHTMLAttributes<HTMLButtonElement>[ "type" ]
+	disabled?: boolean
 }
 
-export default function StyledButton({ children, onClick, type = "button" }: Props) {
+export default function StyledButton({ children, onClick, type = "button", disabled = false }: Props) {
 	return (
-		<button type={ type } className={ Styles.button } onClick={ onClick }>{ children }</button>
+		<button type={ type } className={ Styles.button } onClick={ onClick } disabled={ disabled }>{ children }</button>
 	)
 }

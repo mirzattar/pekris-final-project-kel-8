@@ -32,6 +32,15 @@
 	color: var(--fg-secondary);
 }
 
+.field_help {
+	font-size: 0.875rem;
+}
+
+.error {
+	color: crimson;
+	white-space: pre-wrap;
+}
+
 .control {
 	width: 100%;
 	min-width: 0;
@@ -66,7 +75,7 @@ textarea.control {
 	justify-content: flex-end;
 }
 
-@media (width <= 600px) {
+@media (width <=600px) {
 	.fields {
 		grid-template-columns: 1fr;
 	}

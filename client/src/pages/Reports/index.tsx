@@ -4,7 +4,7 @@ import Browse from "../../components/Browse"
 import ErrorScreen from "../../components/ErrorScreen"
 import ReportBox from "../../components/ReportBox"
 import SearchBox from "../../components/SearchBox"
-import { getReportById, getReports, type Report, type ReportFilters } from "../../services/reportApi"
+import { getReportById, getReportsPage, type Report, type ReportFilters, type ReportsMeta } from "../../services/reportApi"
 import Styles from "./index.module.css"
 
 function getPositiveInteger(value: string | null): number | undefined {
@@ -46,6 +46,8 @@ export default function Reports() {
 		key: string
 		status: "loading" | "success" | "error"
 		reports: Report[]
+		meta?: ReportsMeta
+		error?: string
 	}>({ key: queryKey, status: "loading", reports: [] })
 
 	useEffect(() => {
@@ -53,12 +55,25 @@ export default function Reports() {
 
 		const loadReports = async () => {
 			try {
-				const reports = reportId
-					? [ await getReportById(reportId) ]
-					: await getReports(getReportFilters(query))
-				if (isCurrent) setResult({ key: queryKey, status: "success", reports })
-			} catch {
-				if (isCurrent) setResult({ key: queryKey, status: "error", reports: [] })
+				let reports: Report[]
+				let meta: ReportsMeta | undefined
+				if (reportId) {
+					reports = [ await getReportById(reportId) ]
+				} else {
+					const page = await getReportsPage(getReportFilters(query))
+					reports = page.data
+					meta = page.meta
+				}
+				if (isCurrent) setResult({ key: queryKey, status: "success", reports, meta })
+			} catch (error) {
+				if (isCurrent) {
+					setResult({
+						key: queryKey,
+						status: "error",
+						reports: [],
+						error: error instanceof Error ? error.message : "Unable to load reports."
+					})
+				}
 			}
 		}
 
@@ -86,7 +101,9 @@ export default function Reports() {
 	}
 
 	if (!reportId) {
-		if (currentResult.status === "error") return <ErrorScreen kind="noReportsFound" />
+		if (currentResult.status === "error") {
+			return <ErrorScreen kind="noReportsFound" message={ currentResult.error } />
+		}
 
 		return (
 			<>
@@ -131,7 +148,7 @@ export default function Reports() {
 					</label>
 					<button
 						type="button"
-						disabled={ currentResult.status !== "success" || currentResult.reports.length < currentLimit }
+						disabled={ currentResult.status !== "success" || currentPage >= (currentResult.meta?.totalPages ?? 0) }
 						onClick={ () => navigateToPage(currentPage + 1) }
 					>
 						Next
@@ -142,7 +159,9 @@ export default function Reports() {
 		)
 	}
 
-	if (currentResult.status === "error") return <ErrorScreen kind="noReportIdFound" />
+	if (currentResult.status === "error") {
+		return <ErrorScreen kind="noReportIdFound" message={ currentResult.error } />
+	}
 	if (currentResult.status === "loading") return <p role="status">Loading report...</p>
 
 	const report: Report | null = currentResult.reports[ 0 ] ?? null

@@ -12,7 +12,7 @@ PIC: Fossy
 
 ## Deskripsi
 
-Website Lost & Found: Mempertemukan mahasiswa yang kehilangan barangnya dengan orang yang menemukannya. Final Project RISTEK Open Class Web Development 2026.
+Website Lost & Found: Connecting students who lost their belongings with those who have found them. Part of Final Project RISTEK Open Class Web Development 2026.
 
 ## Checkpoint 1
 
@@ -62,3 +62,40 @@ The report submission format provides several fields:
 7. An optional image upload of the reported item.
 
 The image upload field is entirely optional, and can be emptied if so desired. A placeholder image of the item category will be used instead.
+
+## Checkpoint 2
+
+### API
+
+Production base URL:
+
+```
+https://pekris-final-project-kel-8-production.up.railway.app
+```
+
+Full endpoint list, query parameters, status codes, and request examples in [`docs/api-contract.md`](docs/api-contract.md).
+
+Available endpoints:
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| GET | `/` | Health check |
+| GET | `/reports` | Listing, search, filter, pagination |
+| GET | `/reports/:id` | Report details |
+| POST | `/reports` | Submit a text-based report |
+
+### Running the server locally
+
+```bash
+cd server
+npm install
+cp .env.example .env
+npm run dev
+```
+
+The server runs on `http://localhost:3000`. Environment variables are listed in `server/.env.example`.
+
+### Notes
+
+Reports are stored in memory, so reports created through `POST /reports` are lost after a server restart. PostgreSQL persistence with Prisma is implemented in CP3.
+

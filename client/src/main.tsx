@@ -9,7 +9,7 @@ import './index.css'
 import { BrowserRouter, Route, Routes } from "react-router"
 import App from "./App"
 
-export type Routes = "/" | "/account" | "/report" | "/reports"
+export type Routes = "/" | "/account" | "/report" | "/reports" | "/reports/:reportId"
 
 createRoot(document.getElementById('root')!).render(
 	<StrictMode>
@@ -18,7 +18,7 @@ createRoot(document.getElementById('root')!).render(
 				<Route index element={ <App currentRoute="/"><Index /></App> } />
 				<Route path="report" element={ <App currentRoute="/report"><Report /></App> } />
 				<Route path="reports" element={ <App currentRoute="/reports"><Reports /></App> } />
-				<Route path="reports/:reportId" element={ <App currentRoute="/reports"><Reports /></App> } />
+				<Route path="reports/:reportId" element={ <App currentRoute="/reports/:reportId"><Reports /></App> } />
 				<Route path="account" element={ <App currentRoute="/account"><Account /></App> } />
 			</Routes>
 		</BrowserRouter>

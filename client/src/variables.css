@@ -7,14 +7,14 @@
 	--accent-6: #f9f871;
 
 	--bg-primary: white;
-	--bg-secondary: #F8F8F8;
+	--bg-secondary: #f8f8f8;
 
 	--fg-primary: rgb(51 51 51);
 	--fg-secondary: rgb(156 163 175);
 	--fg-complement: oklch(from var(--fg-primary) calc(2 - l) c h);
 
 	--border-rad: 1rem;
-	--border-rad-2: .5rem;
+	--border-rad-2: 0.5rem;
 	--border-rad-pill: 100vw;
 
 	--fg-w-normal: 500;
@@ -28,11 +28,11 @@
 		--accent: oklch(from #5038bc calc(l + var(--dimming-factor)) c h);
 
 		--bg-primary: black;
-		--bg-secondary: oklch(from #F8F8F8 calc(l - 0.75) c h);
+		--bg-secondary: oklch(from #f8f8f8 calc(l - 0.75) c h);
 
 		--fg-primary: whitesmoke;
 		--fg-secondary: rgb(156 163 175);
 
-		--shadow: rgba(255 255 255 / 0.2)
+		--shadow: rgba(255 255 255 / 0.2);
 	}
 }

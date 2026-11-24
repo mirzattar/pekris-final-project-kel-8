@@ -1,6 +1,20 @@
 .footer {
+	flex-shrink: 0;
 	background-color: var(--bg-secondary);
 	display: flex;
-	padding: 2rem;
+	gap: 1rem;
+	padding: 2rem clamp(1rem, 4vw, 4rem);
 	justify-content: space-evenly;
+	color: var(--fg-secondary);
+	flex-wrap: wrap;
+	text-align: center;
+
+	a {
+
+		text-decoration-color: transparent;
+	}
+}
+
+.logo {
+	font-size: 1.5em;
 }

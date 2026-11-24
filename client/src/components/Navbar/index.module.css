@@ -1,21 +1,23 @@
 .nav_container {
 	display: flex;
 	position: fixed;
+	inset-block-start: 0;
+	inset-inline: 0;
 	min-height: 4rem;
-	/* z-index: 2; */
-	min-width: 100vw;
 	box-shadow: 0 0 6px var(--shadow);
 	align-items: stretch;
 	padding-block: 1rem;
-	padding-inline: 2rem;
-	container-name: --nav;
-	container-type: inline-size;
+	padding-inline: clamp(1rem, 4vw, 4rem);
 	background-color: var(--bg-primary);
 }
 
 .logo_container {
 	align-self: flex-start;
 	display: none;
+
+	a {
+		text-decoration-color: transparent;
+	}
 }
 
 .profile_icon {
@@ -39,9 +41,13 @@
 .toggle_sidebar {
 	display: flex;
 	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	border: 0;
+	padding: 0;
+	background: transparent;
 	cursor: pointer;
-	flex-shrink: 1;
-	z-index: 2;
+	z-index: 1;
 }
 
 .menu_list {
@@ -85,11 +91,20 @@
 	display: flex;
 	position: fixed;
 	background-color: var(--bg-primary);
-	height: 25vh;
-	min-width: 100vw;
+	top: 4rem;
+	right: 1rem;
+	left: auto;
+	width: max-content;
+	max-width: calc(100vw - 2rem);
 	box-shadow: 0 0 6px var(--shadow);
-	top: 0;
-	left: 0;
+	border-radius: var(--border-rad-2);
+	padding: 1rem;
+
+	.menu_list {
+		align-items: stretch;
+		flex-direction: column;
+		gap: 1rem;
+	}
 }
 
 .sidebar_toggle_icon {
@@ -116,10 +131,6 @@
 }
 
 @media (width > 768px) {
-	.nav_container {
-		padding-inline: 4rem;
-	}
-
 	.sidebar {
 		display: flex;
 	}

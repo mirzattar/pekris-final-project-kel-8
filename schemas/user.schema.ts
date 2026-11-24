@@ -24,5 +24,6 @@ export default {
 		"name",
 		"email",
 		"preferredContact"
-	]
+	],
+	"additionalProperties": false
 } as const

@@ -1,13 +1,14 @@
 html,
 body {
-	padding: 0
+	min-height: 100%;
+	padding: 0;
 }
 
 *,
 *::after,
 *::before {
 	margin: 0;
-	box-sizing: border-box
+	box-sizing: border-box;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -29,7 +30,9 @@ select {
 }
 
 #app {
-	flex: auto;
+	display: flex;
+	flex: 1;
+	flex-direction: column;
 	font-family: "Poppins", sans-serif;
 	color: var(--fg-primary);
 }
@@ -48,6 +51,15 @@ select {
 #app,
 #app * {
 	transition-property: background-color, color;
-	transition-duration: 500ms;
+	transition-duration: 500ms, 250ms;
 	transition-timing-function: ease-in-out;
+}
+
+a {
+	text-decoration-color: transparent;
+	color: var(--accent);
+}
+
+button {
+	color: inherit;
 }

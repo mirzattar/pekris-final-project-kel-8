@@ -77,5 +77,6 @@ export default {
 		"contactMethod",
 		"createdAt",
 		"status"
-	]
+	],
+	"additionalProperties": false
 } as const

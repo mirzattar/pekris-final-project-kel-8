@@ -5,7 +5,6 @@ import StyledButton from "../../components/StyledButton"
 import { createReport, type CreateReportPayload } from "../../services/reportApi"
 import Styles from "./index.module.css"
 
-const DEFAULT_REPORTER_ID = "user-001"
 const DEFAULT_CONTACT_METHOD: CreateReportPayload["contactMethod"] = "EMAIL"
 
 export default function Report() {
@@ -38,7 +37,6 @@ export default function Report() {
             category: getText("category").toUpperCase(),
             location: getText("location"),
             incidentDate: getText("incidentDate"),
-            reporterId: DEFAULT_REPORTER_ID,
             contactMethod: DEFAULT_CONTACT_METHOD
         }
 
@@ -171,9 +169,9 @@ export default function Report() {
                             id="report-contact-method"
                             name="contactMethod"
                             defaultValue={DEFAULT_CONTACT_METHOD}
-                            disabled
                         >
-                            <option value="EMAIL">Email (temporary default)</option>
+                            <option value="EMAIL">Email</option>
+                            <option value="WHATSAPP">WhatsApp</option>
                         </select>
                     </label>
                 </div>

@@ -112,7 +112,6 @@ export type CreateReportPayload = {
 	category: string
 	location: string
 	incidentDate: string
-	reporterId: string
 	contactMethod: "EMAIL" | "WHATSAPP"
 }
 

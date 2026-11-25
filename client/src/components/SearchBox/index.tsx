@@ -1,4 +1,3 @@
-import { Label } from "radix-ui"
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons"
 import { useNavigate, useSearchParams } from "react-router"
 import Styles from "./index.module.css"

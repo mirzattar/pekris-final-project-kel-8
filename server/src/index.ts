@@ -25,6 +25,7 @@ app.use((_req, res) => {
 
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   const error = err as { type?: string; status?: number; statusCode?: number }
+  console.error(error)
   if (error.type === 'entity.parse.failed') {
     return res.status(400).json({ error: { code: 'INVALID_JSON', message: 'Request body is not valid JSON' } })
   }

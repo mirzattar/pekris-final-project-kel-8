@@ -1,7 +1,7 @@
 import { Router } from 'express'
-import reports from '../../../mock/reports.json'
-import users from '../../../mock/users.json'
+import { PrismaClient, type Category, type ContactMethod, type ReportType, type ReportStatus, type User } from '@prisma/client'
 
+const prisma = new PrismaClient()
 const router = Router()
 const categories = ['BOTTLE', 'STATIONERY', 'ACCESSORIES', 'ELECTRONICS', 'DOCUMENTS', 'CLOTHING', 'OTHERS']
 const reportFields = ['title', 'description', 'type', 'category', 'location', 'incidentDate', 'reporterId', 'contactMethod']
@@ -11,15 +11,43 @@ const isDate = (value: unknown): value is string =>
   isString(value) && /^\d{4}-\d{2}-\d{2}$/.test(value) &&
   !Number.isNaN(Date.parse(`${value}T00:00:00Z`)) && new Date(`${value}T00:00:00Z`).toISOString().startsWith(value)
 
+// incidentDate is a DATE column, so it is serialized as YYYY-MM-DD, not a full timestamp.
+const toReportJson = (report: {
+  id: string
+  title: string
+  description: string
+  type: string
+  category: string
+  location: string
+  incidentDate: Date
+  imageUrl: string | null
+  reporterId: string
+  contactMethod: string
+  status: string
+  createdAt: Date
+}) => ({
+  id: report.id,
+  title: report.title,
+  description: report.description,
+  type: report.type,
+  category: report.category,
+  location: report.location,
+  incidentDate: report.incidentDate.toISOString().slice(0, 10),
+  imageUrl: report.imageUrl,
+  reporterId: report.reporterId,
+  contactMethod: report.contactMethod,
+  status: report.status,
+  createdAt: report.createdAt.toISOString()
+})
+
 // Only the contact method chosen on the report is exposed, never both.
-const publicReporter = (reporterId: string, contactMethod: string) => {
-  const user = users.find(u => u.id === reporterId)
+const publicReporter = (user: User | null | undefined, contactMethod: string) => {
   if (!user) return null
   const value = contactMethod === 'WHATSAPP' ? user.whatsapp : user.email
   return { name: user.name, contact: { method: contactMethod, value: value ?? null } }
 }
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   const errors: { field: string; message: string }[] = []
   const { search, q, type, category, location, status, incidentDate } = req.query
 
@@ -52,7 +80,7 @@ router.get('/', (req, res) => {
     }
   }
 
-  const term = singleString('search', search ?? q)?.toLowerCase()
+  const term = singleString('search', search ?? q)
   const typeFilter = singleString('type', type)
   if (typeFilter && typeFilter !== 'LOST' && typeFilter !== 'FOUND') {
     errors.push({ field: 'type', message: 'type must be LOST or FOUND' })
@@ -75,48 +103,49 @@ router.get('/', (req, res) => {
     return res.status(400).json({ error: { code: 'INVALID_QUERY', message: 'Invalid query parameters', details: errors } })
   }
 
-  let filtered = reports
+  const where: Record<string, unknown> = {}
   if (term) {
-    filtered = filtered.filter(r =>
-      r.title.toLowerCase().includes(term) || r.description.toLowerCase().includes(term)
-    )
+    where.OR = [
+      { title: { contains: term, mode: 'insensitive' } },
+      { description: { contains: term, mode: 'insensitive' } }
+    ]
   }
-  if (typeFilter) {
-    filtered = filtered.filter(r => r.type === typeFilter)
-  }
-  if (categoryFilter) {
-    filtered = filtered.filter(r => r.category === categoryFilter)
-  }
-  if (locationFilter) {
-    filtered = filtered.filter(r => r.location.toLowerCase().includes(locationFilter.toLowerCase()))
-  }
-  if (statusFilter) {
-    filtered = filtered.filter(r => r.status === statusFilter)
-  }
-  if (dateFilter) {
-    filtered = filtered.filter(r => r.incidentDate === dateFilter)
-  }
+  if (typeFilter) where.type = typeFilter as ReportType
+  if (categoryFilter) where.category = categoryFilter as Category
+  if (locationFilter) where.location = { contains: locationFilter, mode: 'insensitive' }
+  if (statusFilter) where.status = statusFilter as ReportStatus
+  if (dateFilter) where.incidentDate = new Date(`${dateFilter}T00:00:00Z`)
 
-  const sorted = [...filtered].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-  const total = sorted.length
-  const totalPages = total === 0 ? 0 : Math.ceil(total / limit)
-  const start = (page - 1) * limit
+  const [total, rows] = await Promise.all([
+    prisma.report.count({ where }),
+    prisma.report.findMany({
+      where,
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      skip: (page - 1) * limit,
+      take: limit
+    })
+  ])
 
   res.json({
-    data: sorted.slice(start, start + limit),
-    meta: { page, limit, total, totalPages }
+    data: rows.map(toReportJson),
+    meta: { page, limit, total, totalPages: total === 0 ? 0 : Math.ceil(total / limit) }
   })
 })
 
-router.get('/:id', (req, res) => {
-  const report = reports.find(r => r.id === req.params.id)
+router.get('/:id', async (req, res) => {
+  const report = await prisma.report.findUnique({
+    where: { id: req.params.id },
+    include: { reporter: true }
+  })
   if (!report) {
     return res.status(404).json({ error: { code: 'REPORT_NOT_FOUND', message: 'Report not found' } })
   }
-  res.json({ data: { ...report, reporter: publicReporter(report.reporterId, report.contactMethod) } })
+  res.json({
+    data: { ...toReportJson(report), reporter: publicReporter(report.reporter, report.contactMethod) }
+  })
 })
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) {
     return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Request body must be a JSON object' } })
   }
@@ -152,27 +181,25 @@ router.post('/', (req, res) => {
     return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid report data', details: errors } })
   }
 
-  if (!users.some(u => u.id === reporterId)) {
+  const reporter = await prisma.user.findUnique({ where: { id: reporterId } })
+  if (!reporter) {
     return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid report data', details: [{ field: 'reporterId', message: 'reporterId does not exist' }] } })
   }
 
-  const newReport = {
-    id: `report-${String(reports.length + 1).padStart(3, '0')}`,
-    title,
-    description,
-    type,
-    category,
-    location,
-    incidentDate,
-    imageUrl: null,
-    reporterId,
-    contactMethod,
-    status: 'ACTIVE',
-    createdAt: new Date().toISOString()
-  }
+  const newReport = await prisma.report.create({
+    data: {
+      title: title.trim(),
+      description: description.trim(),
+      type: type as ReportType,
+      category: category as Category,
+      location: location.trim(),
+      incidentDate: new Date(`${incidentDate}T00:00:00Z`),
+      reporterId,
+      contactMethod: contactMethod as ContactMethod
+    }
+  })
 
-  reports.push(newReport)
-  res.status(201).json({ data: newReport })
+  res.status(201).json({ data: toReportJson(newReport) })
 })
 
 export default router

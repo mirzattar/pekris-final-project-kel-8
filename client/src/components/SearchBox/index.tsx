@@ -34,9 +34,6 @@ export default function SearchBox() {
 					navigate(`/reports${search ? `?${search}` : ""}`)
 				} }
 			>
-				<Label.Root htmlFor="report-search" className={ Styles.search_label }>
-					Search using item name, type, location, and more
-				</Label.Root>
 				<div className={ Styles.search_controls }>
 					<input
 						type="search"

@@ -190,7 +190,7 @@ router.post('/', async (req, res) => {
       category: category as Category,
       location: location.trim(),
       incidentDate: new Date(`${incidentDate}T00:00:00Z`),
-      reporterId,
+      reporterId: "user-001",
       contactMethod: contactMethod as ContactMethod
     }
   })

@@ -181,10 +181,7 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid report data', details: errors } })
   }
 
-  const reporter = await prisma.user.findUnique({ where: { id: reporterId } })
-  if (!reporter) {
-    return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid report data', details: [{ field: 'reporterId', message: 'reporterId does not exist' }] } })
-  }
+ 
 
   const newReport = await prisma.report.create({
     data: {

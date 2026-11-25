@@ -167,9 +167,8 @@ router.post('/', async (req, res) => {
   requiredText('title', title)
   requiredText('description', description)
   requiredText('location', location)
-  if (!isString(reporterId) || !reporterId.trim()) errors.push({ field: 'reporterId', message: 'reporterId must be a non-empty string' })
   if (type !== 'LOST' && type !== 'FOUND') errors.push({ field: 'type', message: 'type must be LOST or FOUND' })
-  if (!isString(category) || !categories.includes(category)) errors.push({ field: 'category', message: 'category is invalid' })
+  if (!isString(category)) errors.push({ field: 'category', message: 'category is invalid' })
   if (!isDate(incidentDate)) {
     errors.push({ field: 'incidentDate', message: 'incidentDate must be a valid YYYY-MM-DD date' })
   } else if (incidentDate > new Date().toISOString().slice(0, 10)) {
@@ -181,7 +180,7 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid report data', details: errors } })
   }
 
- 
+
 
   const newReport = await prisma.report.create({
     data: {

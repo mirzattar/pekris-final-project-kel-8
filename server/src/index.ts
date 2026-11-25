@@ -9,7 +9,8 @@ const app = express()
 const PORT = process.env.PORT || 3000
 const corsOrigins = process.env.CORS_ORIGIN?.split(',').map(origin => origin.trim()).filter(Boolean)
 
-app.use(cors({ origin: corsOrigins?.length ? corsOrigins : '*' }))
+// app.use(cors({ origin: corsOrigins?.length ? corsOrigins : '*' }))
+app.use(cors({ origin: "https://pekris-final-project-kel-8.vercel.app/" }))
 app.use(express.json())
 
 app.use('/reports', reportRoutes)

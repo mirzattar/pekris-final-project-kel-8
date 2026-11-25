@@ -233,9 +233,11 @@ CORS_ORIGIN=http://localhost:5173,https://<frontend-domain>
 
 When `CORS_ORIGIN` is unset, every origin is allowed (`*`). Trailing slashes are not stripped, so list origins without one. A request from an origin not in the list gets no `Access-Control-Allow-Origin` header and the browser blocks it.
 
-## Storage limitation
+## Storage
 
-This checkpoint stores reports in memory. A created report survives until the next restart or redeploy, then the API returns only the ten seeded reports from `mock/reports.json`. PostgreSQL persistence via Prisma is planned for the next checkpoint. The id of a created report is derived from the current list length, so ids are not globally unique across restarts.
+Reports are stored in PostgreSQL through Prisma and survive restarts and redeploys. There is no in-memory fallback.
+
+The ten seeded reports use readable ids such as `report-001`. Reports created through `POST /reports` receive a generated id such as `cmwvnvt2y0001qt017h5f3lmf`. Do not assume the `report-` prefix; treat `id` as an opaque string.
 
 ## Running locally
 
@@ -243,26 +245,34 @@ This checkpoint stores reports in memory. A created report survives until the ne
 cd server
 npm install
 cp .env.example .env
+npx prisma migrate dev
+npx prisma db seed
 npm run dev
 ```
+
+`prisma migrate dev` creates the tables and `db seed` loads the five users and ten reports from `mock/`. Both need a working `DATABASE_URL`.
 
 Build and run production:
 
 ```
 cd server
+npx prisma generate
 npm run build
 npm start
 ```
 
 ## Deployment
 
-Hosted on Railway. Because the server imports `mock/` from the repository root, the Railway service must build from the repository root, not from `server/`.
+Hosted on Railway, with a Railway PostgreSQL database attached to the same project.
 
 | Setting | Value |
 | --- | --- |
 | Root Directory | `/` (repository root) |
-| Build Command | `cd server && npm ci && npm run build` |
-| Start Command | `node server/dist/index.js` |
+| Build Command | `cd server && npm ci && npx prisma generate && npm run build` |
+| Start Command | `cd server && npx prisma migrate deploy && node dist/index.js` |
+| Variable | `DATABASE_URL=${{Postgres.DATABASE_URL}}` |
 | Variable | `CORS_ORIGIN=http://localhost:5173,<frontend-domain>` |
+
+`migrate deploy` runs on every start and applies pending migrations. `DATABASE_URL` must reference the database over Railway's private network, not the public TCP proxy.
 
 Railway injects `PORT`. Do not set it manually.

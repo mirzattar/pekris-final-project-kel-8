@@ -1,7 +1,7 @@
 # Database Design
 
-Data structure plan for CP1 (not implemented yet), Prisma is only used in Week 3.
-Field reference: `mock/reports.json` and `mock/users.json`.
+Implemented in `server/prisma/schema.prisma`. PostgreSQL, accessed through Prisma ORM.
+Seed data comes from `mock/reports.json` and `mock/users.json`.
 
 ## Report Table
 
@@ -13,7 +13,7 @@ Fields used:
 - `type` — enum ReportType, values LOST or FOUND
 - `category` — enum Category, default OTHERS
 - `location` — String, where the item was lost/found
-- `incidentDate` — DateTime, incident date
+- `incidentDate` — DateTime, date only (`@db.Date`), so it serializes as `YYYY-MM-DD`
 - `imageUrl` — String, optional (null when there is no photo)
 - `reporterId` — String, links to User.id
 - `contactMethod` — enum ContactMethod
@@ -25,6 +25,7 @@ Fields used:
 - `id` — String, primary key
 - `name` — String
 - `email` — String, unique
+- `whatsapp` — String, optional, used when a report selects WHATSAPP as its contact method
 - `preferredContact` — enum ContactMethod
 
 
@@ -46,7 +47,7 @@ ReportStatus: ACTIVE, RESOLVED
 
 LOST/FOUND comes from the brief requirement. The rest is copied from the existing mock.
 
-## Prisma schema plan (Week 3)
+## Schema
 
 ```prisma
 enum ReportType {
@@ -78,6 +79,7 @@ model User {
   id               String         @id @default(cuid())
   name             String
   email            String         @unique
+  whatsapp         String?
   preferredContact ContactMethod
   reports          Report[]
 }
@@ -89,7 +91,7 @@ model Report {
   type          ReportType
   category      Category       @default(OTHERS)
   location      String
-  incidentDate  DateTime
+  incidentDate  DateTime       @db.Date
   imageUrl      String?
   reporterId    String
   contactMethod ContactMethod
@@ -103,3 +105,16 @@ model Report {
   @@index([location])
 }
 ```
+
+## Migration workflow
+
+```bash
+cd server
+npx prisma migrate dev --name <name>   # local: create and apply
+npx prisma db seed                     # load mock data
+npx prisma migrate deploy              # production: apply pending migrations
+```
+
+Migration files live in `server/prisma/migrations/` and are committed. Production applies them through the Railway Start Command.
+
+Seeded rows keep readable ids (`report-001`…`report-010`). New reports receive a generated cuid, so `id` should be treated as an opaque string.

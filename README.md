@@ -90,12 +90,16 @@ Available endpoints:
 cd server
 npm install
 cp .env.example .env
+npx prisma migrate dev
+npx prisma db seed
 npm run dev
 ```
 
 The server runs on `http://localhost:3000`. Environment variables are listed in `server/.env.example`.
 
+`prisma migrate dev` creates the tables. `prisma db seed` loads five users and ten reports from `mock/`. Both need a working `DATABASE_URL`.
+
 ### Notes
 
-Reports are stored in memory, so reports created through `POST /reports` are lost after a server restart. Seed contacts in `mock/` are fictional and cannot be reached. PostgreSQL persistence with Prisma is implemented in CP3.
+Reports are stored in PostgreSQL through Prisma, so they survive restarts. Seed contacts in `mock/` are fictional and cannot be reached.
 
